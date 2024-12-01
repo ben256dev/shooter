@@ -1,0 +1,17 @@
+name: Shooter CI
+
+on:
+  push:
+    branches: [ "main", "jake-dev" ]
+  pull_request:
+    branches: [ "main", "jake-dev" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: make
+      run: make
