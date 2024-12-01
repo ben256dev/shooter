@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Clone the repository
 git clone https://github.com/libsdl-org/SDL.git tools/SDL3
 
