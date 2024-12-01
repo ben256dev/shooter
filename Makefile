@@ -12,7 +12,7 @@ endif
 
 LDFLAGS_LIB	=$(shell pkg-config --libs sdl3)
 CFLAGS_LIB	=$(shell pkg-config --cflags sdl3)
-SRCS	:=$(shell find src -type f -name "*.[c|h]")
+SRCS	:=$(shell find . -type f -name "*.[c|h]")
 GETOBJS	=$(patsubst %.c,$(BINDIR)/%.o,$(filter %.c,$(1)))
 OBJS	:=$(call GETOBJS,$(SRCS))
 TARGET	:=shooter
