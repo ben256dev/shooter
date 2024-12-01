@@ -59,18 +59,22 @@ UNAME		:=$(shell uname)
 GLSL_DIR	:=shaders/glsl
 GLSL_SRCS	:=$(shell find $(GLSL_DIR) -type f -name "*.glsl")
 GLSL_FLAGS	:=-x glsl -O
-GET_GLSL_OUT	=$(patsubst %,res/%.spv,$(1))
+GET_GLSL_OUT	=$(patsubst %.glsl,res/%.spv,$(1))
 METAL_DIR	:=shaders/metal
 METAL_SRCS	:=$(shell find $(METAL_DIR) -type f -name "*.metal")
 METAL_FLAGS	:=-Wall -O3
-GET_METAL_OUT	=$(patsubst %,res/%.metallib,$(1))
+GET_METAL_OUT	=$(patsubst %.metal,res/%.metallib,$(1))
 
 # $(1) input
 # $(2) output
 define MAKEGLSL
 $(2): $(1)
 	mkdir -p $$(dir $$@)
-	glslc $(GLSL_FLAGS) $$^ -o $$@
+	if [ '$(findstring .vert,$(1))' = '.vert' ]; then \
+		glslc $(GLSL_FLAGS) -fshader-stage=vertex $$^ -o $$@; \
+	else \
+		glslc $(GLSL_FLAGS) -fshader-stage=fragment $$^ -o $$@; \
+	fi
 endef
 
 # $(1) input
@@ -84,22 +88,19 @@ $(2): $(1)
 endef
 
 ifeq ($(UNAME),Darwin)
-# Metal
-
-# Shader target (all shaders)
-shaders: $(call GET_METAL_OUT,$(METAL_SRCS))
-
-# Build shader sources
-$(foreach src,$(METAL_SRCS),$(eval $(call MAKEMETAL,$(src),$(call GET_METAL_OUT,$(src)))))
+shaders: metal_shaders
 else
-# Glsl
+shaders: glsl_shaders
+endif
 
 # Shader target (all shaders)
-shaders: $(call GET_GLSL_OUT,$(GLSL_SRCS))
-
-# Build shader sources
+metal_shaders: $(call GET_METAL_OUT,$(METAL_SRCS))
+# Shader target (all shaders)
+glsl_shaders: $(call GET_GLSL_OUT,$(GLSL_SRCS))
+# Build shader sources (metal)
+$(foreach src,$(METAL_SRCS),$(eval $(call MAKEMETAL,$(src),$(call GET_METAL_OUT,$(src)))))
+# Build shader sources (glsl)
 $(foreach src,$(GLSL_SRCS),$(eval $(call MAKEGLSL,$(src),$(call GET_GLSL_OUT,$(src)))))
-endif
 
 .PHONY: clean
 clean:
