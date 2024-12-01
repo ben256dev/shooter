@@ -26,7 +26,7 @@ rel: $(BINDIR)/$(TARGET)
 ifeq ($(SDL3_EXISTS),0)
 $(BINDIR)/$(TARGET): $(OBJS)
 	mkdir -p $(dir $@)
-	$(CC) $(LDFLAGS) $(LDFLAGS_LIB) $^ -o $@
+	$(CC) $^ -o $@ $(LDFLAGS) $(LDFLAGS_LIB)
 run: $(BINDIR)/$(TARGET)
 	$<
 
@@ -34,7 +34,7 @@ run: $(BINDIR)/$(TARGET)
 define MAKEOBJ
 $(BINDIR)/$(dir $(1))$(shell gcc -M $(1) | tr -d '\\\n')
 	mkdir -p $$(dir $$@)
-	$(CC) $(CFLAGS) $(CFLAGS_LIB) -c $$< -o $$@
+	$(CC) -c $$< -o $$@ $(CFLAGS) $(CFLAGS_LIB)
 endef
 
 $(foreach src,$(SRCS),$(eval $(call MAKEOBJ,$(src))))
