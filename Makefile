@@ -52,24 +52,54 @@ $(BINDIR)/$(TARGET):
 	$(MAKE) $(MAKECMDGOALS)
 endif
 
-# Build the shaders
-SHDRS	:=$(shell find shaders -type f -name "*.vert") $(shell find shaders -type f -name "*.frag")
-GETSPRV	=$(patsubst %,res/%.spv,$(1))
-SHDRCC	:=glslc
-SHDRFLAGS	:=-x glsl -O
+# See if we are on an apple system
+UNAME		:=$(shell uname)
 
-# Shader target
-shaders: $(call GETSPRV,$(SHDRS))
+# Build the shaders
+GLSL_DIR	:=shaders/glsl
+GLSL_SRCS	:=$(shell find $(GLSL_DIR) -type f -name "*.glsl")
+GLSL_FLAGS	:=-x glsl -O
+GET_GLSL_OUT	=$(patsubst %,res/%.spv,$(1))
+METAL_DIR	:=shaders/metal
+METAL_SRCS	:=$(shell find $(METAL_DIR) -type f -name "*.metal")
+METAL_FLAGS	:=-Wall -O3
+GET_METAL_OUT	=$(patsubst %,res/%.metallib,$(1))
 
 # $(1) input
 # $(2) output
-define MAKESHDR
+define MAKEGLSL
 $(2): $(1)
 	mkdir -p $$(dir $$@)
-	$(SHDRCC) $(SHDRFLAGS) $$^ -o $$@
+	glslc $(GLSL_FLAGS) $$^ -o $$@
 endef
 
-$(foreach shdr,$(SHDRS),$(eval $(call MAKESHDR,$(shdr),$(call GETSPRV,$(shdr)))))
+# $(1) input
+# $(2) output
+define MAKEMETAL
+$(2): $(1)
+	mkdir -p $$(dir $$@)
+	intermediate=$(patsubst %.metallib,%.ir,$(2));\
+	xcrun -sdk macosx metal -o $$$intermediate -c $$^;\
+	xcrun -sdk macosx metallib -o $$@ $$$intermediate
+endef
+
+ifeq ($(UNAME),Darwin)
+# Metal
+
+# Shader target (all shaders)
+shaders: $(call GET_METAL_OUT,$(METAL_SRCS))
+
+# Build shader sources
+$(foreach src,$(METAL_SRCS),$(eval $(call MAKEMETAL,$(src),$(call GET_METAL_OUT,$(src)))))
+else
+# Glsl
+
+# Shader target (all shaders)
+shaders: $(call GET_GLSL_OUT,$(GLSL_SRCS))
+
+# Build shader sources
+$(foreach src,$(GLSL_SRCS),$(eval $(call MAKEGLSL,$(src),$(call GET_GLSL_OUT,$(src)))))
+endif
 
 .PHONY: clean
 clean:
