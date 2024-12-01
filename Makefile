@@ -2,7 +2,7 @@ FINDGOAL=$(findstring $(1),$(MAKECMDGOALS))
 
 ifeq ($(call FINDGOAL,rel),rel)
 	BINDIR	:=bin/rel
-	CFLAGS	:=$(CFLAGS) -O2
+	CFLAGS	:=$(CFLAGS) -O2 -NDEBUG
 	LDFLAGS	:=$(LDFLAGS)
 else
 	BINDIR	:=bin/dbg
@@ -13,7 +13,7 @@ endif
 LDFLAGS_LIB	=$(shell pkg-config --libs sdl3)
 CFLAGS_LIB	=$(shell pkg-config --cflags sdl3)
 SDL3_EXISTS	:=$(shell pkg-config --exists sdl3; echo $$?)
-SRCS	:=$(shell find . -type f -name "*.[c|h]")
+SRCS	:=$(shell find . -type f -name "*.c")
 GETOBJS	=$(patsubst %.c,$(BINDIR)/%.o,$(filter %.c,$(1)))
 OBJS	:=$(call GETOBJS,$(SRCS))
 TARGET	:=shooter
@@ -29,6 +29,10 @@ $(BINDIR)/$(TARGET): $(OBJS)
 	$(CC) $^ -o $@ $(LDFLAGS) $(LDFLAGS_LIB)
 run: $(BINDIR)/$(TARGET)
 	$<
+gdb: $(BINDIR)/$(TARGET)
+	gdb $<
+lldb: $(BINDIR)/$(TARGET)
+	lldb $<
 
 # $(1) source file
 define MAKEOBJ
