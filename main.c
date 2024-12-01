@@ -14,7 +14,5 @@ int main(int argc, char *argv[]) {
              SDL_INIT_CAMERA );
 
     printf("Hello world!\n");
-
     return 0;
 }
-
