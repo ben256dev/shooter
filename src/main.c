@@ -13,7 +13,19 @@ static SDL_GPUGraphicsPipeline* pipeline;
 static SDL_GPUTexture* tex_msaa;
 static SDL_GPUTexture* tex_resolve;
 
-static SDL_GPUShader* load_shader(const char* path, SDL_GPUShaderCreateInfo initial_info)
+typedef struct shader_info {
+    SDL_GPUShader* shader;
+    u8* code;
+    usize codelen;
+} shader_info_t;
+
+static void shader_info_deinit(shader_info_t* self)
+{
+    SDL_ReleaseGPUShader(gpu, self->shader);
+    free(self->code);
+}
+
+static shader_info_t load_shader(const char* path, SDL_GPUShaderCreateInfo initial_info)
 {
     char fullpath[512];
 
@@ -23,10 +35,13 @@ static SDL_GPUShader* load_shader(const char* path, SDL_GPUShaderCreateInfo init
     snprintf(fullpath, arrlen(fullpath), "res/shaders/glsl/%s.spv", path);
 #endif
 
-    if (!(initial_info.code = load_file_bytes(fullpath, &initial_info.code_size))) {
+    shader_info_t info = { 0 };
+    if (!(info.code = load_file_bytes(fullpath, &info.codelen))) {
         warn("Can't load shader path: %s", fullpath);
-        goto err;
+        return info;
     }
+    initial_info.code = info.code;
+    initial_info.code_size = info.codelen;
 
 #ifdef __APPLE__
     initial_info.format = SDL_GPU_SHADERFORMAT_METALLIB;
@@ -44,17 +59,11 @@ static SDL_GPUShader* load_shader(const char* path, SDL_GPUShaderCreateInfo init
     initial_info.format = SDL_GPU_SHADERFORMAT_SPIRV;
     initial_info.entrypoint = "main";
 #endif
-    SDL_GPUShader* shader = SDL_CreateGPUShader(gpu, &initial_info);
-    if (!shader) {
+    if (!(info.shader = SDL_CreateGPUShader(gpu, &initial_info))) {
         warn("Can't load shader binary: %s", fullpath);
-        goto err;
     }
 
-    free((void*)initial_info.code);
-    return shader;
-err:
-    free((void*)initial_info.code);
-    return NULL;
+    return info;
 }
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
@@ -65,7 +74,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         sdldie("SDL_Init");
     }
 
-    if (!(window = SDL_CreateWindow("obama", 800, 600, SDL_WINDOW_HIDDEN))) {
+    if (!(window = SDL_CreateWindow("obama", 800, 600, 0))) {
         sdldie("SDL_CreateWindow");
     }
     if (!(gpu = SDL_CreateGPUDevice(SHADERFORMATS, true, NULL))) {
@@ -73,7 +82,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
     SDL_ClaimWindowForGPUDevice(gpu, window);
 
-    SDL_GPUShader *vertex, *fragment;
+    shader_info_t vertex, fragment;
     if (!(vertex = load_shader("test.vert",
               (SDL_GPUShaderCreateInfo) {
                   .stage = SDL_GPU_SHADERSTAGE_VERTEX,
@@ -82,7 +91,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
                   .num_storage_textures = 0,
                   .num_uniform_buffers = 0,
                   .props = 0,
-              }))) {
+              }))
+            .shader) {
         return SDL_APP_FAILURE;
     }
 
@@ -94,7 +104,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
                   .num_storage_textures = 0,
                   .num_uniform_buffers = 0,
                   .props = 0,
-              }))) {
+              }))
+            .shader) {
         return SDL_APP_FAILURE;
     }
 
@@ -122,8 +133,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         },
         .multisample_state.sample_count = sample_count,
         .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
-        .vertex_shader = vertex,
-        .fragment_shader = fragment,
+        .vertex_shader = vertex.shader,
+        .fragment_shader = fragment.shader,
         .vertex_input_state = {
             .num_vertex_buffers = 0,
             .num_vertex_attributes = 0,
@@ -133,8 +144,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         sdldie("SDL_CreateGPUGraphicsPipeline");
     }
 
-    SDL_ReleaseGPUShader(gpu, vertex);
-    SDL_ReleaseGPUShader(gpu, fragment);
+    shader_info_deinit(&vertex);
+    shader_info_deinit(&fragment);
 
     if (sample_count != 1) {
         int w, h;
@@ -161,7 +172,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
                       .height = h,
                       .layer_count_or_depth = 1,
                       .num_levels = 1,
-                      .sample_count = sample_count,
+                      .sample_count = SDL_GPU_SAMPLECOUNT_1,
                       .usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER,
                       .props = 0,
                   }))) {
