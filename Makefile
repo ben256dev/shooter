@@ -12,20 +12,18 @@ endif
 
 LDFLAGS_LIB	=$(shell pkg-config --libs sdl3)
 CFLAGS_LIB	=$(shell pkg-config --cflags sdl3)
+SDL3_EXISTS	:=$(shell pkg-config --exists sdl3; echo $$?)
 SRCS	:=$(shell find . -type f -name "*.[c|h]")
 GETOBJS	=$(patsubst %.c,$(BINDIR)/%.o,$(filter %.c,$(1)))
 OBJS	:=$(call GETOBJS,$(SRCS))
 TARGET	:=shooter
 
-.INTERMEDIATE: SDL3
 .DEFAULT_GOAL: dbg
-dbg: $(BINDIR)/$(TARGET) SDL3
-rel: $(BINDIR)/$(TARGET) SDL3
+dbg: $(BINDIR)/$(TARGET)
+rel: $(BINDIR)/$(TARGET)
 
-SDL3:
-	@if [ $$(pkg-config --exists sdl3) ]; then \
-		tools/build_sdl3.sh; \
-	fi
+# It exists so run this
+ifeq ($(SDL3_EXISTS),0)
 $(BINDIR)/$(TARGET): $(OBJS)
 	mkdir -p $(dir $@)
 	$(CC) $(LDFLAGS) $(LDFLAGS_LIB) $^ -o $@
@@ -40,8 +38,16 @@ $(BINDIR)/$(dir $(1))$(shell gcc -M $(1) | tr -d '\\\n')
 endef
 
 $(foreach src,$(SRCS),$(eval $(call MAKEOBJ,$(src))))
+else
+# Build it first
+$(BINDIR)/$(TARGET):
+	# Build SDL3
+	tools/build_sdl3.sh
+
+	# Rebuild after we've built it
+	$(MAKE) $(MAKECMDGOALS)
+endif
 
 .PHONY: clean
 clean:
 	rm -rf bin/
-
