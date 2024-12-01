@@ -71,7 +71,6 @@ endef
 
 $(foreach shdr,$(SHDRS),$(eval $(call MAKESHDR,$(shdr),$(call GETSPRV,$(shdr)))))
 
-
 .PHONY: clean
 clean:
 	rm -rf bin/ res/shaders/
