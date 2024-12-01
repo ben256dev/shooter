@@ -74,7 +74,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         sdldie("SDL_Init");
     }
 
-    if (!(window = SDL_CreateWindow("obama", 800, 600, 0))) {
+    if (!(window = SDL_CreateWindow("obama", 800, 600, SDL_WINDOW_HIGH_PIXEL_DENSITY))) {
         sdldie("SDL_CreateWindow");
     }
     if (!(gpu = SDL_CreateGPUDevice(SHADERFORMATS, true, NULL))) {
