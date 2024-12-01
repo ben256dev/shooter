@@ -3,10 +3,14 @@
 // Returns false if the render can still render the game but something is fishy
 bool render_state_init(render_state_t* self)
 {
+    *self = (render_state_t) {
+        .shader_format = SDL_GPU_SHADERFORMAT_SPIRV,
+    };
+
     if (!(self->win = SDL_CreateWindow("shooter", 800, 600, SDL_WINDOW_RESIZABLE))) {
         sdldie("SDL_CreateWindow");
     }
-    if (!(self->gpu = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, ISDBG, NULL))) {
+    if (!(self->gpu = SDL_CreateGPUDevice(self->shader_format, ISDBG, NULL))) {
         sdldie("SDL_CreateGPUDevice");
     }
     if (!SDL_ClaimWindowForGPUDevice(self->gpu, self->win)) {
@@ -50,4 +54,35 @@ void render_state_render(render_state_t* self)
     if (!SDL_BeginGPURenderPass(self->cmdbuf, self->ctargs, arrlen(self->ctargs), &self->dstarg)) {
         sdldie("SDL_BeginGPURenderPass");
     }
+}
+
+SDL_GPUShader* render_state_load_shader(
+    render_state_t* self, const char* spriv_path, SDL_GPUShaderStage stage)
+{
+    usize byteslen;
+    u8* bytes = load_file_bytes(spriv_path, &byteslen);
+    if (!bytes) {
+        warn("load_shader: can't open file %s\n", spriv_path);
+        return NULL;
+    }
+
+    SDL_GPUShader* shader = SDL_CreateGPUShader(self->gpu,
+        &(SDL_GPUShaderCreateInfo) {
+            .code_size = byteslen,
+            .code = bytes,
+            .entrypoint = "main",
+            .format = self->shader_format,
+            .stage = SDL_GPU_SHADERSTAGE_VERTEX,
+            .num_samplers = 0,
+            .num_storage_textures = 0,
+            .num_storage_buffers = 0,
+            .num_uniform_buffers = 0,
+        });
+
+    if (!shader) {
+        warn("Could not load shader %s\n", spriv_path);
+        return NULL;
+    }
+
+    return shader;
 }

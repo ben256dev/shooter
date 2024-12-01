@@ -43,6 +43,15 @@ void _die(const char* fmt, ...);
 #define sdldie(fmt, ...)                                                                           \
     _die("%s:%d \x1b[1;31merror: %s(): \x1b[0m" fmt ": \x1b[0m%s\n", __FILE__, __LINE__, __func__, \
         ##__VA_ARGS__, SDL_GetError())
+#define log(fmt, ...)                                                                              \
+    SDL_Log("%s:%d \x1b[1;31minfo: %s(): \x1b[0m" fmt "\n", __FILE__, __LINE__, __func__,          \
+        ##__VA_ARGS__)
+#define warn(fmt, ...)                                                                             \
+    SDL_LogWarn(0, "%s:%d \x1b[1;31minfo: %s(): \x1b[0m" fmt "\n", __FILE__, __LINE__, __func__,   \
+        ##__VA_ARGS__)
+
+u8* load_file_bytes(const char* path, usize* len);
+char* load_file_string(const char* path);
 
 void* xmalloc(size_t size);
 NONNULL(1) void* xrealloc(void* ptr, size_t size);

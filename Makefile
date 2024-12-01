@@ -13,7 +13,7 @@ endif
 LDFLAGS_LIB	=$(shell pkg-config --libs sdl3)
 CFLAGS_LIB	=$(shell pkg-config --cflags sdl3)
 SDL3_EXISTS	:=$(shell pkg-config --exists sdl3; echo $$?)
-SRCS	:=$(shell find . -type f -name "*.c")
+SRCS	:=$(shell find src -type f -name "*.c")
 GETOBJS	=$(patsubst %.c,$(BINDIR)/%.o,$(filter %.c,$(1)))
 OBJS	:=$(call GETOBJS,$(SRCS))
 TARGET	:=shooter
@@ -52,6 +52,26 @@ $(BINDIR)/$(TARGET):
 	$(MAKE) $(MAKECMDGOALS)
 endif
 
+# Build the shaders
+SHDRS	:=$(shell find shaders -type f -name "*.vert") $(shell find shaders -type f -name "*.frag")
+GETSPRV	=$(patsubst %,res/%.spv,$(1))
+SHDRCC	:=glslc
+SHDRFLAGS	:=-x glsl -O
+
+# Shader target
+shaders: $(call GETSPRV,$(SHDRS))
+
+# $(1) input
+# $(2) output
+define MAKESHDR
+$(2): $(1)
+	mkdir -p $$(dir $$@)
+	$(SHDRCC) $(SHDRFLAGS) $$^ -o $$@
+endef
+
+$(foreach shdr,$(SHDRS),$(eval $(call MAKESHDR,$(shdr),$(call GETSPRV,$(shdr)))))
+
+
 .PHONY: clean
 clean:
-	rm -rf bin/
+	rm -rf bin/ res/shaders/

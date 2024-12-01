@@ -14,8 +14,11 @@ typedef struct render_state {
     SDL_GPUColorTargetInfo ctargs[1];
     SDL_GPUDepthStencilTargetInfo dstarg;
     SDL_Window* win;
+    SDL_GPUShaderFormat shader_format;
 } render_state_t;
 
 bool render_state_init(render_state_t* self);
 void render_state_deinit(render_state_t* self);
 void render_state_render(render_state_t* self);
+SDL_GPUShader* render_state_load_shader(
+    render_state_t* self, const char* spriv_path, SDL_GPUShaderStage stage);
