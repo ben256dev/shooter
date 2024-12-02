@@ -742,3 +742,110 @@ u0 mat4_model_from_vec3 ( mat4 *p_result, vec3 location, vec3 rotation, vec3 sca
     // Done
     return;
 }
+
+u0 mat4_view_from_vec3 ( mat4 *p_view, vec3 eye, vec3 target, vec3 up )
+{
+    
+    // Argument check
+    if ( p_view == (void *) 0 ) goto no_view;
+
+    // Initialized data
+    vec3 _forward = { 0 },
+         _left    = { 0 },
+         _up      = { 0 },
+         _scratch = { 0 };
+    
+    // Compute the forward vector
+    vec3_normalize (
+        &_forward,
+        (vec3)
+        {
+            .x = eye.x - target.x,
+            .y = eye.y - target.y,
+            .z = eye.z - target.z
+        }
+    );
+
+    // Compute the left vector
+    vec3_cross_product(&_scratch, up, _forward);
+
+    // Normalize the left vector
+    vec3_normalize(&_left, _scratch);
+
+    // (Re)compute the up vector
+    vec3_cross_product(&_up, _left, _forward);
+
+    //vec3_mul_scalar(&_up, _up, -1.0f);
+
+    // Store the orientation
+    *p_view = (mat4)
+    {
+        .a = _left.x, .b = _up.x, .c = _forward.x, .d = 0,
+        .e = _left.y, .f = _up.y, .g = _forward.y, .h = 0,
+        .i = _left.z, .j = _up.z, .k = _forward.z, .l = 0,
+        .m =       0, .n =     0, .o =          0, .p = 1,        
+    };
+
+    // Store the location
+    vec3_dot_product(&p_view->m, _left   , eye);
+    vec3_dot_product(&p_view->n, _up     , eye);
+    vec3_dot_product(&p_view->o, _forward, eye);
+    p_view->m *= -1;
+    p_view->n *= -1;
+    p_view->o *= -1;
+
+    // Done
+    return;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_view:
+                #ifndef NDEBUG
+                    printf("[camera] Null pointer provided for parameter \"p_view\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return;
+        }
+    }
+}
+
+u0 mat4_perspective_from_vec3 ( mat4 *p_projection, float fov, float aspect, float near_clip, float far_clip )
+{
+    
+    // Argument check
+    if ( p_projection == (void *) 0 ) goto no_projection;
+    
+    // Initialized data
+    const float tan_fov_2 = (float) tanf(fov / 2.0f);
+
+    // Store the orientation
+    *p_projection = (mat4)
+    {
+        .a = 1.0f / (aspect * tan_fov_2), .b = 0              , .c = 0                                                , .d =  0,
+        .e = 0                          , .f = 1.0f / tan_fov_2, .g = 0                                               , .h =  0,
+        .i = 0                          , .j = 0              , .k = -(far_clip + near_clip) / (far_clip - near_clip) , .l = -1,
+        .m = 0                          , .n = 0              , .o = 2 * far_clip * near_clip / (near_clip - far_clip), .p =  0,        
+    };
+
+    // Done
+    return;
+
+    // Error handling
+    {
+
+        // Argument errors
+        {
+            no_projection:
+                #ifndef NDEBUG
+                    printf("[camera] Null pointer provided for parameter \"p_projection\" in call to function \"%s\"\n", __FUNCTION__);
+                #endif
+
+                // Error
+                return;
+        }
+    }
+}
