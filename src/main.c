@@ -254,7 +254,9 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     // TODO: Resize window textures
 
     mat4 _mat4s[3];
-    mat4_translation(&_mat4s[0], (vec3) { .x = 0.0f, .y = 0.0f, .z = -1.0f });
+    mat4_model_from_vec3(&_mat4s[0], (vec3) { .x = 0.0f, .y = 0.0f, .z = -1.0f },
+        (vec3) { .x = 0.0f, .y = 1.5f, .z = 0.0f }, (vec3) { .x = 1.0f, .y = 1.0f, .z = 1.0f });
+    // mat4_translation(&_mat4s[0], (vec3) { .x = 0.0f, .y = 0.0f, .z = -1.0f });
     mat4_identity(&_mat4s[1]);
     mat4_perspective_from_vec3(
         &_mat4s[2], DEG2RAD(80.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
