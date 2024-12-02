@@ -116,7 +116,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     //     &mesh, gpu,
     //     _base_mesh_data[MESH_CONE].verticies.
     //);
-    if (!mesh_init_from_ply(&mesh, gpu, "res/monke.ply")) {
+    if (!mesh_init_from_ply(&mesh, gpu, "res/player.ply")) {
         return SDL_APP_FAILURE;
     }
     //{
