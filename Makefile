@@ -1,13 +1,13 @@
 FINDGOAL=$(findstring $(1),$(MAKECMDGOALS))
+LDFLAGS	:=$(LDFLAGS)
+CFLAGS	:=$(CFLAGS) -Ideps/cglm/include
 
 ifeq ($(call FINDGOAL,rel),rel)
 	BINDIR	:=bin/rel
-	CFLAGS	:=$(CFLAGS) -O2 -NDEBUG
-	LDFLAGS	:=$(LDFLAGS)
+	CFLAGS	+=$(CFLAGS) -O2 -NDEBUG
 else
 	BINDIR	:=bin/dbg
-	CFLAGS	:=$(CFLAGS) -O0 -g
-	LDFLAGS	:=$(LDFLAGS)
+	CFLAGS	+=$(CFLAGS) -O0 -g
 endif
 
 LDFLAGS_LIB	=$(shell pkg-config --libs sdl3)
