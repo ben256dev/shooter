@@ -16,6 +16,6 @@ vertex VertexOut vertex_main(VertexIn vertexIn [[stage_in]])
 {
     VertexOut out;
     out.position = float4(vertexIn.position, 1.0);
-    out.color = float4(vertexIn.position, 1.0);
+    out.color = float4(vertexIn.normal, 1.0);
     return out;
 }
