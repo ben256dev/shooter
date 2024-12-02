@@ -4,6 +4,15 @@
 #undef VERTEX_ATTRIB
 #undef VERTEX_END
 #define VERTEX_BEGIN(name)                                                                         \
+    static inline SDL_GPUVertexBufferDescription get_##name##_desc(u32 bufslot, u32 step_rate)     \
+    {                                                                                              \
+        return (SDL_GPUVertexBufferDescription) {                                                  \
+            .slot = bufslot,                                                                       \
+            .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,                                          \
+            .instance_step_rate = step_rate,                                                       \
+            .pitch = sizeof(name##_t),                                                             \
+        };                                                                                         \
+    }                                                                                              \
     static inline vertex_attribs_t get_##name##_attribs(u32 bufslot, u32 initial_location)         \
     {                                                                                              \
         static bool inited = false;                                                                \

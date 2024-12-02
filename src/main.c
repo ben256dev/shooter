@@ -3,6 +3,7 @@
 #include <SDL3/SDL_main.h>
 
 #include "common.h"
+#include "mesh.h"
 
 #define SHADERFORMATS (SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_METALLIB)
 #define USEMSAA true
@@ -12,6 +13,7 @@ static SDL_GPUDevice* gpu;
 static SDL_GPUGraphicsPipeline* pipeline;
 static SDL_GPUTexture* tex_msaa;
 static SDL_GPUTexture* tex_resolve;
+static SDL_GPUBuffer* vertex_buffer;
 
 typedef struct shader_info {
     SDL_GPUShader* shader;
@@ -109,6 +111,16 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
+    vec2s verts[] = {
+        (vec2s) { .x = 0.0f, .y = -0.2f },
+        (vec2s) { .x = -0.2f, .y = 0.1f },
+        (vec2s) { .x = 0.2f, .y = 0.1f },
+    };
+    vertex_buffer = create_vertex_buffer(gpu, sizeof(verts));
+    if (!update_vertex_buffer_once(gpu, vertex_buffer, verts, sizeof(verts), 0)) {
+        return SDL_APP_FAILURE;
+    }
+
     u32 sample_count = SDL_GPU_SAMPLECOUNT_1;
     if (USEMSAA
         && SDL_GPUTextureSupportsSampleCount(
@@ -136,8 +148,12 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         .vertex_shader = vertex.shader,
         .fragment_shader = fragment.shader,
         .vertex_input_state = {
-            .num_vertex_buffers = 0,
-            .num_vertex_attributes = 0,
+            .vertex_buffer_descriptions = (SDL_GPUVertexBufferDescription[]){
+                get_uivert_desc(0, 0)
+            },
+            .num_vertex_buffers = 1,
+            .vertex_attributes = get_uivert_attribs(0, 0).attribs,
+            .num_vertex_attributes = get_uivert_attribs(0, 0).nattribs,
         },
         .props = 0,
     }))) {
@@ -185,13 +201,12 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
-    switch (event->type)
-    {
-        case SDL_EVENT_QUIT:
-            return SDL_APP_SUCCESS;
-            break;
-        default:
-            break;
+    switch (event->type) {
+    case SDL_EVENT_QUIT:
+        return SDL_APP_SUCCESS;
+        break;
+    default:
+        break;
     }
     return SDL_APP_CONTINUE;
 }
@@ -232,6 +247,14 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         },
         1, NULL);
     SDL_BindGPUGraphicsPipeline(pass, pipeline);
+    SDL_BindGPUVertexBuffers(pass, 0,
+        (SDL_GPUBufferBinding[]) {
+            (SDL_GPUBufferBinding) {
+                .buffer = vertex_buffer,
+                .offset = 0,
+            },
+        },
+        1);
     SDL_DrawGPUPrimitives(pass, 3, 1, 0, 0);
     SDL_EndGPURenderPass(pass);
 
@@ -258,6 +281,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
+    SDL_ReleaseGPUBuffer(gpu, vertex_buffer);
     SDL_ReleaseGPUTexture(gpu, tex_msaa);
     SDL_ReleaseGPUTexture(gpu, tex_resolve);
     SDL_ReleaseWindowFromGPUDevice(gpu, window);
