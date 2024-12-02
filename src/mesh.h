@@ -1,10 +1,10 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <cglm/struct/vec4.h>
 
 #include "attrib_generators.h"
 #include "common.h"
+#include "linear.h"
 
 typedef struct vertex_attribs {
     u32 nattribs, nlocations;
@@ -13,13 +13,13 @@ typedef struct vertex_attribs {
 
 #define UI_VERTEX                                                                                  \
     VERTEX_BEGIN(uivert)                                                                           \
-    VERTEX_ATTRIB(pos, vec2s)                                                                      \
+    VERTEX_ATTRIB(pos, vec3)                                                                       \
     VERTEX_END(uivert)
 #define COLOR_VERTEX                                                                               \
     VERTEX_BEGIN(colorvert)                                                                        \
-    VERTEX_ATTRIB(pos, vec3s)                                                                      \
-    VERTEX_ATTRIB(uv, vec2s)                                                                       \
-    VERTEX_ATTRIB(norm, vec3s)                                                                     \
+    VERTEX_ATTRIB(pos, vec3)                                                                       \
+    VERTEX_ATTRIB(uv, vec2)                                                                        \
+    VERTEX_ATTRIB(norm, vec3)                                                                      \
     VERTEX_END(colorvert)
 #include "create_vertex_struct.h"
 COLOR_VERTEX

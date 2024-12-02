@@ -8,13 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <cglm/struct/ivec2.h>
-#include <cglm/struct/ivec3.h>
-#include <cglm/struct/ivec4.h>
-#include <cglm/struct/mat4.h>
-#include <cglm/struct/vec2.h>
-#include <cglm/struct/vec3.h>
-#include <cglm/struct/vec4.h>
+#include "linear.h"
 
 typedef int8_t i8;
 typedef uint8_t u8;
@@ -29,6 +23,16 @@ typedef double f64;
 typedef size_t usize;
 typedef intptr_t iptr;
 typedef uintptr_t uptr;
+
+typedef struct {
+    i32 x, y;
+} ivec2;
+typedef struct {
+    i32 x, y, z;
+} ivec3;
+typedef struct {
+    i32 x, y, z, w;
+} ivec4;
 
 #define arrlen(arr) (sizeof(arr) / sizeof((arr)[0]))
 
