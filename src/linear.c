@@ -8,6 +8,7 @@
 
 // Header
 #include "linear.h"
+#include "common.h"
 
 // Function definitions
 u0 vec2_add_vec2 ( vec2 *p_result, vec2 a, vec2 b )
@@ -804,7 +805,7 @@ u0 mat4_view_from_vec3 ( mat4 *p_view, vec3 eye, vec3 target, vec3 up )
         {
             no_view:
                 #ifndef NDEBUG
-                    printf("[camera] Null pointer provided for parameter \"p_view\" in call to function \"%s\"\n", __FUNCTION__);
+                    die("p_view: nullptr");
                 #endif
 
                 // Error
@@ -841,7 +842,7 @@ u0 mat4_perspective_from_vec3 ( mat4 *p_projection, float fov, float aspect, flo
         {
             no_projection:
                 #ifndef NDEBUG
-                    printf("[camera] Null pointer provided for parameter \"p_projection\" in call to function \"%s\"\n", __FUNCTION__);
+                    die("p_projection: nullptr");
                 #endif
 
                 // Error
