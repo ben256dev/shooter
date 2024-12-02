@@ -1,13 +1,18 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct VertexOut {
+    float4 position [[position]];
+    float4 color;
+};
+
 struct FragmentOut {
     float4 color [[color(0)]];
 };
 
-fragment FragmentOut fragment_main()
+fragment FragmentOut fragment_main(VertexOut in [[stage_in]])
 {
     FragmentOut out;
-    out.color = float4(1.0, 0.0, 0.0, 1.0); // Red color
+    out.color = in.color; // Red color
     return out;
 }

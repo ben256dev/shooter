@@ -5,15 +5,15 @@
 
 #define _ATTRIB_GENERATORS                                                                         \
     _ATTRIB_GENERATOR(float, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT, 1)                                 \
-    _ATTRIB_GENERATOR(vec2s, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2, 1)                                \
-    _ATTRIB_GENERATOR(vec3s, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3, 1)                                \
-    _ATTRIB_GENERATOR(vec4s, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4, 1)                                \
+    _ATTRIB_GENERATOR(vec2, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2, 1)                                 \
+    _ATTRIB_GENERATOR(vec3, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3, 1)                                 \
+    _ATTRIB_GENERATOR(vec4, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4, 1)                                 \
     _ATTRIB_GENERATOR(int, SDL_GPU_VERTEXELEMENTFORMAT_INT, 1)                                     \
     _ATTRIB_GENERATOR(unsigned, SDL_GPU_VERTEXELEMENTFORMAT_UINT, 1)                               \
-    _ATTRIB_GENERATOR(ivec2s, SDL_GPU_VERTEXELEMENTFORMAT_INT2, 1)                                 \
-    _ATTRIB_GENERATOR(ivec3s, SDL_GPU_VERTEXELEMENTFORMAT_INT3, 1)                                 \
-    _ATTRIB_GENERATOR(ivec4s, SDL_GPU_VERTEXELEMENTFORMAT_INT4, 1)                                 \
-    _ATTRIB_GENERATOR(mat4s, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4, 4);
+    _ATTRIB_GENERATOR(ivec2, SDL_GPU_VERTEXELEMENTFORMAT_INT2, 1)                                  \
+    _ATTRIB_GENERATOR(ivec3, SDL_GPU_VERTEXELEMENTFORMAT_INT3, 1)                                  \
+    _ATTRIB_GENERATOR(ivec4, SDL_GPU_VERTEXELEMENTFORMAT_INT4, 1)                                  \
+    _ATTRIB_GENERATOR(mat4, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4, 4);
 
 typedef struct _vertex_attribs {
     u32 nattribs;
