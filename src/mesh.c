@@ -79,7 +79,9 @@ bool mesh_init_from_data(
         }
     };
 
-    return self->verts.buf && self->idxs.buf;
+    return self->verts.buf && self->idxs.buf
+        && update_vertex_buffer_once(dev, self->verts.buf, verts, sz, 0)
+        && update_vertex_buffer_once(dev, self->idxs.buf, idxs, len * sizeof(*idxs), 0);
 }
 bool mesh_init_from_ply(mesh_t* self, SDL_GPUDevice* dev, const char* ply_path)
 {
