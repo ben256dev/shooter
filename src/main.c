@@ -3,19 +3,21 @@
 #include <SDL3/SDL_main.h>
 
 #include "common.h"
+#include "linear.h"
 #include "mesh.h"
 #include "shapes.h"
 
 #define SHADERFORMATS (SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_METALLIB)
 #define USEMSAA true
 
+#define WINDOW_WIDTH 800.0f
+#define WINDOW_HEIGHT 600.0f
 static SDL_Window* window;
 static SDL_GPUDevice* gpu;
 static SDL_GPUGraphicsPipeline* pipeline;
 static SDL_GPUTexture* tex_msaa;
 static SDL_GPUTexture* tex_resolve;
-static SDL_GPUBuffer* vertex_buffer;
-static SDL_GPUBuffer* index_buffer;
+static mesh_t mesh;
 
 typedef struct shader_info {
     SDL_GPUShader* shader;
@@ -78,7 +80,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         sdldie("SDL_Init");
     }
 
-    if (!(window = SDL_CreateWindow("obama", 800, 600, SDL_WINDOW_HIGH_PIXEL_DENSITY))) {
+    if (!(window = SDL_CreateWindow(
+              "obama", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_HIGH_PIXEL_DENSITY))) {
         sdldie("SDL_CreateWindow");
     }
     if (!(gpu = SDL_CreateGPUDevice(SHADERFORMATS, true, NULL))) {
@@ -93,7 +96,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
                   .num_samplers = 0,
                   .num_storage_buffers = 0,
                   .num_storage_textures = 0,
-                  .num_uniform_buffers = 0,
+                  .num_uniform_buffers = 1,
                   .props = 0,
               }))
             .shader) {
@@ -113,20 +116,27 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
-    {
-        usize vsz = _base_mesh_data[MESH_CONE].verticies.quantity * sizeof(float);
-        void* v = (void*)_base_mesh_data[MESH_CONE].verticies._data;
-        vertex_buffer = create_vertex_buffer(gpu, vsz);
-        if (!update_vertex_buffer_once(gpu, vertex_buffer, v, vsz, 0)) {
-            return SDL_APP_FAILURE;
-        }
-        usize isz = _base_mesh_data[MESH_CONE].elements.quantity * sizeof(float);
-        void* i = (void*)_base_mesh_data[MESH_CONE].elements._data;
-        index_buffer = create_index_buffer(gpu, isz);
-        if (!update_vertex_buffer_once(gpu, index_buffer, i, isz, 0)) {
-            return SDL_APP_FAILURE;
-        }
+    // mesh_init_from_data(
+    //     &mesh, gpu,
+    //     _base_mesh_data[MESH_CONE].verticies.
+    //);
+    if (!mesh_init_from_ply(&mesh, gpu, "res/player2.ply")) {
+        return SDL_APP_FAILURE;
     }
+    //{
+    //    usize vsz = _base_mesh_data[MESH_CONE].verticies.quantity * sizeof(float);
+    //    void* v = (void*)_base_mesh_data[MESH_CONE].verticies._data;
+    //    vertex_buffer = create_vertex_buffer(gpu, vsz);
+    //    if (!update_vertex_buffer_once(gpu, vertex_buffer, v, vsz, 0)) {
+    //        return SDL_APP_FAILURE;
+    //    }
+    //    usize isz = _base_mesh_data[MESH_CONE].elements.quantity * sizeof(float);
+    //    void* i = (void*)_base_mesh_data[MESH_CONE].elements._data;
+    //    index_buffer = create_index_buffer(gpu, isz);
+    //    if (!update_vertex_buffer_once(gpu, index_buffer, i, isz, 0)) {
+    //        return SDL_APP_FAILURE;
+    //    }
+    //}
 
     u32 sample_count = SDL_GPU_SAMPLECOUNT_1;
     if (USEMSAA
@@ -156,11 +166,12 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         .fragment_shader = fragment.shader,
         .vertex_input_state = {
             .vertex_buffer_descriptions = (SDL_GPUVertexBufferDescription[]){
-                get_uivert_desc(0, 0)
+                //get_uivert_desc(0, 0)
+                mesh_buffer_desc(&mesh, false),
             },
             .num_vertex_buffers = 1,
-            .vertex_attributes = get_uivert_attribs(0, 0).attribs,
-            .num_vertex_attributes = get_uivert_attribs(0, 0).nattribs,
+            .vertex_attributes = mesh_vertex_attribs(&mesh, 0).attribs,//get_uivert_attribs(0, 0).attribs,
+            .num_vertex_attributes = mesh_vertex_attribs(&mesh, 0).nattribs,//get_uivert_attribs(0, 0).nattribs,
         },
         .props = 0,
     }))) {
@@ -234,13 +245,27 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         sdldie("SDL_AcquireGPUSwapchainTexture");
     }
 
-    // To many frames in flight? Don't render this frame.
+    // Too many frames in flight? Don't render this frame.
     if (!swap.tex) {
         SDL_SubmitGPUCommandBuffer(cmdbuf);
         return SDL_APP_CONTINUE;
     }
 
     // TODO: Resize window textures
+
+    mat4 _mat4s[3];
+    mat4_model_from_vec3(&_mat4s[0], (vec3) { .x = 0.0f, .y = 0.0f, .z = -1.0f },
+        (vec3) { .x = 0.0f, .y = 1.5f, .z = 0.0f }, (vec3) { .x = 1.0f, .y = 1.0f, .z = 1.0f });
+    // mat4_translation(&_mat4s[0], (vec3) { .x = 0.0f, .y = 0.0f, .z = -1.0f });
+    mat4_identity(&_mat4s[1]);
+    mat4_perspective_from_vec3(
+        &_mat4s[2], DEG2RAD(80.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+
+#ifdef __APPLE__
+    SDL_PushGPUVertexUniformData(cmdbuf, 0, &_mat4s, sizeof(_mat4s));
+#else
+    SDL_PushGPUVertexUniformData(cmdbuf, 1, &_mat4s, sizeof(_mat4s));
+#endif
 
     SDL_GPURenderPass* pass = SDL_BeginGPURenderPass(cmdbuf,
         &(SDL_GPUColorTargetInfo) {
@@ -253,22 +278,10 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             .cycle_resolve_texture = !!tex_msaa,
         },
         1, NULL);
+
     SDL_BindGPUGraphicsPipeline(pass, pipeline);
-    SDL_BindGPUVertexBuffers(pass, 0,
-        (SDL_GPUBufferBinding[]) {
-            (SDL_GPUBufferBinding) {
-                .buffer = vertex_buffer,
-                .offset = 0,
-            },
-        },
-        1);
-    SDL_BindGPUIndexBuffer(pass,
-        &(SDL_GPUBufferBinding) {
-            .buffer = index_buffer,
-            .offset = 0,
-        },
-        SDL_GPU_INDEXELEMENTSIZE_32BIT);
-    SDL_DrawGPUIndexedPrimitives(pass, _base_mesh_data[MESH_CONE].elements.quantity, 1, 0, 0, 0);
+    mesh_bind(&mesh, pass);
+    SDL_DrawGPUIndexedPrimitives(pass, mesh.idxs.len, 1, 0, 0, 0);
     SDL_EndGPURenderPass(pass);
 
     if (tex_msaa) {
@@ -294,8 +307,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
-    SDL_ReleaseGPUBuffer(gpu, vertex_buffer);
-    SDL_ReleaseGPUBuffer(gpu, index_buffer);
+    mesh_deinit(&mesh, gpu);
     SDL_ReleaseGPUTexture(gpu, tex_msaa);
     SDL_ReleaseGPUTexture(gpu, tex_resolve);
     SDL_ReleaseWindowFromGPUDevice(gpu, window);

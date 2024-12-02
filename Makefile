@@ -21,19 +21,19 @@ OBJS	:=$(call GETOBJS,$(SRCS))
 TARGET	:=shooter
 
 .DEFAULT_GOAL: dbg
-dbg: $(BINDIR)/$(TARGET)
-rel: $(BINDIR)/$(TARGET)
+dbg: $(BINDIR)/$(TARGET) shaders
+rel: $(BINDIR)/$(TARGET) shaders
 
 # It exists so run this
 ifeq ($(SDL3_EXISTS),0)
 $(BINDIR)/$(TARGET): $(OBJS)
 	mkdir -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) $(LDFLAGS_LIB)
-run: $(BINDIR)/$(TARGET)
+run: $(BINDIR)/$(TARGET) shaders
 	$<
-gdb: $(BINDIR)/$(TARGET)
+gdb: $(BINDIR)/$(TARGET) shaders
 	gdb $<
-lldb: $(BINDIR)/$(TARGET)
+lldb: $(BINDIR)/$(TARGET) shaders
 	lldb $<
 
 # $(1) source file

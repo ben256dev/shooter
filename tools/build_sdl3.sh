@@ -7,9 +7,9 @@ function build_unix()
 {
 	mkdir build
 	cd build
-	cmake -DCMAKE_BUILD_TYPE=Release ..
-	cmake --build . --config Release --parallel
-	sudo cmake --install . --config Release
+	cmake -DCMAKE_BUILD_TYPE=Debug ..
+	cmake --build . --config Debug --parallel
+	sudo cmake --install . --config Debug
 	cd ../
 }
 

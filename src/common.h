@@ -1,6 +1,7 @@
 #pragma once
 
 #include <errno.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -41,6 +42,8 @@ typedef struct {
 #else
 #define ISDBG 0
 #endif
+
+#define DEG2RAD(D) ((D) / 180.0f * M_PI)
 
 #define NONNULL(...) __attribute__((nonnull(__VA_ARGS__)))
 
