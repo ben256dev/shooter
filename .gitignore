@@ -1,6 +1,6 @@
 bin/
-.metallib
-.spv
+*.metallib
+*.spv
 SDL/
 tags
 termediate

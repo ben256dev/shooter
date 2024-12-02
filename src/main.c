@@ -106,7 +106,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
                   .num_samplers = 0,
                   .num_storage_buffers = 0,
                   .num_storage_textures = 0,
-                  .num_uniform_buffers = 0,
+                  .num_uniform_buffers = 1,
                   .props = 0,
               }))
             .shader) {
@@ -234,13 +234,16 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         sdldie("SDL_AcquireGPUSwapchainTexture");
     }
 
-    // To many frames in flight? Don't render this frame.
+    // Too many frames in flight? Don't render this frame.
     if (!swap.tex) {
         SDL_SubmitGPUCommandBuffer(cmdbuf);
         return SDL_APP_CONTINUE;
     }
 
     // TODO: Resize window textures
+
+    float my_float_uniform = 1.0f;
+    SDL_PushGPUVertexUniformData(cmdbuf, 3, &my_float_uniform, sizeof(float));
 
     SDL_GPURenderPass* pass = SDL_BeginGPURenderPass(cmdbuf,
         &(SDL_GPUColorTargetInfo) {
@@ -253,6 +256,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             .cycle_resolve_texture = !!tex_msaa,
         },
         1, NULL);
+
     SDL_BindGPUGraphicsPipeline(pass, pipeline);
     SDL_BindGPUVertexBuffers(pass, 0,
         (SDL_GPUBufferBinding[]) {
