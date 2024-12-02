@@ -11,7 +11,7 @@
 #define USEMSAA true
 
 #define WINDOW_WIDTH 800.0f
-#define WINDOW_WIDTH 600.0f
+#define WINDOW_HEIGHT 600.0f
 static SDL_Window* window;
 static SDL_GPUDevice* gpu;
 static SDL_GPUGraphicsPipeline* pipeline;
@@ -248,7 +248,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     mat4 _mat4s[3];
     mat4_identity(&_mat4s[0]);
     mat4_identity(&_mat4s[1]);
-    mat4_perspective_from_vec3(&_mat4s[2], 80.0f, width/height, 0.1f, 100.0f);
+    mat4_perspective_from_vec3(&_mat4s[2], 80.0f, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1f, 100.0f);
 
     SDL_PushGPUVertexUniformData(cmdbuf, 0, &_mat4s, sizeof(_mat4s));
 
