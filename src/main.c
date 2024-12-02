@@ -74,7 +74,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         sdldie("SDL_Init");
     }
 
-    if (!(window = SDL_CreateWindow("obama", 800, 600, 0))) {
+    if (!(window = SDL_CreateWindow("obama", 800, 600, SDL_WINDOW_HIGH_PIXEL_DENSITY))) {
         sdldie("SDL_CreateWindow");
     }
     if (!(gpu = SDL_CreateGPUDevice(SHADERFORMATS, true, NULL))) {
@@ -185,8 +185,13 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
-    if (event->type == SDL_EVENT_QUIT) {
-        return SDL_APP_SUCCESS;
+    switch (event->type)
+    {
+        case SDL_EVENT_QUIT:
+            return SDL_APP_SUCCESS;
+            break;
+        default:
+            break;
     }
     return SDL_APP_CONTINUE;
 }
