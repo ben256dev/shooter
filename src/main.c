@@ -120,7 +120,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     //     &mesh, gpu,
     //     _base_mesh_data[MESH_CONE].verticies.
     //);
-    if (!mesh_init_from_ply(&mesh, gpu, "res/player.ply")) {
+    if (!mesh_init_from_ply(&mesh, gpu, "res/player2.ply")) {
         return SDL_APP_FAILURE;
     }
     //{
@@ -254,9 +254,10 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     // TODO: Resize window textures
 
     mat4 _mat4s[3];
-    mat4_identity(&_mat4s[0]);
+    mat4_translation(&_mat4s[0], (vec3) { .x = 0.0f, .y = 0.0f, .z = -1.0f });
     mat4_identity(&_mat4s[1]);
-    mat4_perspective_from_vec3(&_mat4s[2], 80.0f, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+    mat4_perspective_from_vec3(
+        &_mat4s[2], DEG2RAD(80.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 
 #ifdef __APPLE__
     SDL_PushGPUVertexUniformData(cmdbuf, 0, &_mat4s, sizeof(_mat4s));
