@@ -6,7 +6,7 @@ layout(location = 2) in vec3 normal;
 
 layout(location = 0) out vec4 colorOut;
 
-layout(set = 0, binding = 0) uniform UniformBufferObject {
+layout(set = 1, binding = 0) uniform UniformBufferObject {
     mat4 model;
     mat4 view;
     mat4 projection;

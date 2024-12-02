@@ -258,7 +258,11 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     mat4_identity(&_mat4s[1]);
     mat4_perspective_from_vec3(&_mat4s[2], 80.0f, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 
+#ifdef __APPLE__
     SDL_PushGPUVertexUniformData(cmdbuf, 0, &_mat4s, sizeof(_mat4s));
+#else
+    SDL_PushGPUVertexUniformData(cmdbuf, 1, &_mat4s, sizeof(_mat4s));
+#endif
 
     SDL_GPURenderPass* pass = SDL_BeginGPURenderPass(cmdbuf,
         &(SDL_GPUColorTargetInfo) {
