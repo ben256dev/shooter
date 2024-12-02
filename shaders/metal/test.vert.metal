@@ -1,15 +1,17 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct VertexIn {
+    float2 position [[attribute(0)]];
+};
+
 struct VertexOut {
     float4 position [[position]];
 };
 
-constant float2 positions[3] = { float2(0.0, -0.5), float2(0.5, 0.5), float2(-0.5, 0.5) };
-
-vertex VertexOut vertex_main(uint vertexID [[vertex_id]])
+vertex VertexOut vertex_main(VertexIn vertexIn [[stage_in]])
 {
     VertexOut out;
-    out.position = float4(positions[vertexID], 0.0, 1.0);
+    out.position = float4(vertexIn.position, 0.0, 1.0);
     return out;
 }

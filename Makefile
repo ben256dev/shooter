@@ -1,4 +1,6 @@
 FINDGOAL=$(findstring $(1),$(MAKECMDGOALS))
+LDFLAGS	:=$(LDFLAGS)
+CFLAGS	:=$(CFLAGS) -Ideps/cglm/include
 
 ifeq ($(call FINDGOAL,rel),rel)
 	BINDIR	:=bin/rel
@@ -83,8 +85,9 @@ define MAKEMETAL
 $(2): $(1)
 	mkdir -p $$(dir $$@)
 	intermediate=$(patsubst %.metallib,%.ir,$(2));\
-	xcrun -sdk macosx metal -o $$$intermediate -c $$^;\
-	xcrun -sdk macosx metallib -o $$@ $$$intermediate
+	xcrun -sdk macosx metal -o $$$$intermediate -c $$^;\
+	xcrun -sdk macosx metallib -o $$@ $$$$intermediate;\
+	rm $$$$intermediate
 endef
 
 ifeq ($(UNAME),Darwin)

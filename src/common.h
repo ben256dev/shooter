@@ -8,6 +8,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <cglm/struct/ivec2.h>
+#include <cglm/struct/ivec3.h>
+#include <cglm/struct/ivec4.h>
+#include <cglm/struct/mat4.h>
+#include <cglm/struct/vec2.h>
+#include <cglm/struct/vec3.h>
+#include <cglm/struct/vec4.h>
+
 typedef int8_t i8;
 typedef uint8_t u8;
 typedef int16_t i16;
