@@ -83,8 +83,8 @@ define MAKEMETAL
 $(2): $(1)
 	mkdir -p $$(dir $$@)
 	intermediate=$(patsubst %.metallib,%.ir,$(2));\
-	xcrun -sdk macosx metal -o $$$intermediate -c $$^;\
-	xcrun -sdk macosx metallib -o $$@ $$$intermediate
+	xcrun -sdk macosx metal -o $$$$intermediate -c $$^;\
+	xcrun -sdk macosx metallib -o $$@ $$$$intermediate
 endef
 
 ifeq ($(UNAME),Darwin)
