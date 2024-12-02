@@ -632,3 +632,43 @@ u0 mat4_rotation_from_vec3 ( mat4 *p_result, vec3 rotation );
  * @return void
  */
 u0 mat4_model_from_vec3 ( mat4 *p_result, vec3 location, vec3 rotation, vec3 scale );
+
+/** !
+ *  Construct a 4x4 view matrix 
+ *
+ * @param p_view result
+ * @param eye    the camera's position in 3D space
+ * @param target the vector from the camera to the subject
+ * @param up     the up vector
+ *
+ * @sa perspective_matrix
+ *
+ * @return a view mat4
+ */
+u0 mat4_view_from_vec3
+(
+    mat4 *const p_view,
+    vec3        eye,
+    vec3        target,
+    vec3        up
+);
+
+/** !
+ *  Construct a 4x4 perspective matrix from it's parameters
+ *
+ * @param p_projection result
+ * @param fov          the camera's field of view of
+ * @param aspect       the viewport width divided by the viewport height
+ * @param near_clip    distance to the near clipping plane
+ * @param far_clip     distance to the far clipping plane
+ *
+ * @return a 4x4 projection matrix
+ */
+u0 mat4_perspective_from_vec3
+(
+    mat4  *p_projection,
+    float  fov,
+    float  aspect,
+    float  near_clip,
+    float  far_clip
+);

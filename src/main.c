@@ -3,12 +3,15 @@
 #include <SDL3/SDL_main.h>
 
 #include "common.h"
+#include "linear.h"
 #include "mesh.h"
 #include "shapes.h"
 
 #define SHADERFORMATS (SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_METALLIB)
 #define USEMSAA true
 
+#define WINDOW_WIDTH 800.0f
+#define WINDOW_HEIGHT 600.0f
 static SDL_Window* window;
 static SDL_GPUDevice* gpu;
 static SDL_GPUGraphicsPipeline* pipeline;
@@ -77,7 +80,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         sdldie("SDL_Init");
     }
 
-    if (!(window = SDL_CreateWindow("obama", 800, 600, SDL_WINDOW_HIGH_PIXEL_DENSITY))) {
+    if (!(window = SDL_CreateWindow(
+              "obama", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_HIGH_PIXEL_DENSITY))) {
         sdldie("SDL_CreateWindow");
     }
     if (!(gpu = SDL_CreateGPUDevice(SHADERFORMATS, true, NULL))) {
@@ -92,7 +96,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
                   .num_samplers = 0,
                   .num_storage_buffers = 0,
                   .num_storage_textures = 0,
-                  .num_uniform_buffers = 0,
+                  .num_uniform_buffers = 1,
                   .props = 0,
               }))
             .shader) {
@@ -241,13 +245,20 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         sdldie("SDL_AcquireGPUSwapchainTexture");
     }
 
-    // To many frames in flight? Don't render this frame.
+    // Too many frames in flight? Don't render this frame.
     if (!swap.tex) {
         SDL_SubmitGPUCommandBuffer(cmdbuf);
         return SDL_APP_CONTINUE;
     }
 
     // TODO: Resize window textures
+
+    mat4 _mat4s[3];
+    mat4_identity(&_mat4s[0]);
+    mat4_identity(&_mat4s[1]);
+    mat4_perspective_from_vec3(&_mat4s[2], 80.0f, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+
+    SDL_PushGPUVertexUniformData(cmdbuf, 0, &_mat4s, sizeof(_mat4s));
 
     SDL_GPURenderPass* pass = SDL_BeginGPURenderPass(cmdbuf,
         &(SDL_GPUColorTargetInfo) {
@@ -260,6 +271,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             .cycle_resolve_texture = !!tex_msaa,
         },
         1, NULL);
+
     SDL_BindGPUGraphicsPipeline(pass, pipeline);
     mesh_bind(&mesh, pass);
     SDL_DrawGPUIndexedPrimitives(pass, mesh.idxs.len, 1, 0, 0, 0);

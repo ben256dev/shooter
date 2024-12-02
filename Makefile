@@ -21,8 +21,8 @@ OBJS	:=$(call GETOBJS,$(SRCS))
 TARGET	:=shooter
 
 .DEFAULT_GOAL: dbg
-dbg: $(BINDIR)/$(TARGET)
-rel: $(BINDIR)/$(TARGET)
+dbg: $(BINDIR)/$(TARGET) shaders
+rel: $(BINDIR)/$(TARGET) shaders
 
 # It exists so run this
 ifeq ($(SDL3_EXISTS),0)
