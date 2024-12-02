@@ -29,11 +29,11 @@ ifeq ($(SDL3_EXISTS),0)
 $(BINDIR)/$(TARGET): $(OBJS)
 	mkdir -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) $(LDFLAGS_LIB)
-run: $(BINDIR)/$(TARGET)
+run: $(BINDIR)/$(TARGET) shaders
 	$<
-gdb: $(BINDIR)/$(TARGET)
+gdb: $(BINDIR)/$(TARGET) shaders
 	gdb $<
-lldb: $(BINDIR)/$(TARGET)
+lldb: $(BINDIR)/$(TARGET) shaders
 	lldb $<
 
 # $(1) source file
