@@ -3,11 +3,11 @@ FINDGOAL=$(findstring $(1),$(MAKECMDGOALS))
 ifeq ($(call FINDGOAL,rel),rel)
 	BINDIR	:=bin/rel
 	CFLAGS	:=$(CFLAGS) -O2 -NDEBUG
-	LDFLAGS	:=$(LDFLAGS)
+	LDFLAGS	:=$(LDFLAGS) -lm
 else
 	BINDIR	:=bin/dbg
 	CFLAGS	:=$(CFLAGS) -O0 -g
-	LDFLAGS	:=$(LDFLAGS)
+	LDFLAGS	:=$(LDFLAGS) -lm
 endif
 
 LDFLAGS_LIB	=$(shell pkg-config --libs sdl3)
