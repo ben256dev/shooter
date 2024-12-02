@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include "mesh.h"
+#include "shapes.h"
 
 #define SHADERFORMATS (SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_METALLIB)
 #define USEMSAA true
@@ -14,6 +15,7 @@ static SDL_GPUGraphicsPipeline* pipeline;
 static SDL_GPUTexture* tex_msaa;
 static SDL_GPUTexture* tex_resolve;
 static SDL_GPUBuffer* vertex_buffer;
+static SDL_GPUBuffer* index_buffer;
 
 typedef struct shader_info {
     SDL_GPUShader* shader;
@@ -111,14 +113,19 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
-    vec2s verts[] = {
-        (vec2s) { .x = 0.0f, .y = -0.2f },
-        (vec2s) { .x = -0.2f, .y = 0.1f },
-        (vec2s) { .x = 0.2f, .y = 0.1f },
-    };
-    vertex_buffer = create_vertex_buffer(gpu, sizeof(verts));
-    if (!update_vertex_buffer_once(gpu, vertex_buffer, verts, sizeof(verts), 0)) {
-        return SDL_APP_FAILURE;
+    {
+        usize vsz = _base_mesh_data[MESH_CONE].verticies.quantity * sizeof(float);
+        void* v = (void*)_base_mesh_data[MESH_CONE].verticies._data;
+        vertex_buffer = create_vertex_buffer(gpu, vsz);
+        if (!update_vertex_buffer_once(gpu, vertex_buffer, v, vsz, 0)) {
+            return SDL_APP_FAILURE;
+        }
+        usize isz = _base_mesh_data[MESH_CONE].elements.quantity * sizeof(float);
+        void* i = (void*)_base_mesh_data[MESH_CONE].elements._data;
+        index_buffer = create_index_buffer(gpu, isz);
+        if (!update_vertex_buffer_once(gpu, index_buffer, i, isz, 0)) {
+            return SDL_APP_FAILURE;
+        }
     }
 
     u32 sample_count = SDL_GPU_SAMPLECOUNT_1;
@@ -255,7 +262,13 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             },
         },
         1);
-    SDL_DrawGPUPrimitives(pass, 3, 1, 0, 0);
+    SDL_BindGPUIndexBuffer(pass,
+        &(SDL_GPUBufferBinding) {
+            .buffer = index_buffer,
+            .offset = 0,
+        },
+        SDL_GPU_INDEXELEMENTSIZE_32BIT);
+    SDL_DrawGPUIndexedPrimitives(pass, _base_mesh_data[MESH_CONE].elements.quantity, 1, 0, 0, 0);
     SDL_EndGPURenderPass(pass);
 
     if (tex_msaa) {
@@ -282,6 +295,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
     SDL_ReleaseGPUBuffer(gpu, vertex_buffer);
+    SDL_ReleaseGPUBuffer(gpu, index_buffer);
     SDL_ReleaseGPUTexture(gpu, tex_msaa);
     SDL_ReleaseGPUTexture(gpu, tex_resolve);
     SDL_ReleaseWindowFromGPUDevice(gpu, window);
