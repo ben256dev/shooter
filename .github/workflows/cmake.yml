@@ -2,9 +2,9 @@ name: Shooter CI
 
 on:
   push:
-    branches: [ "main", "jake-dev" ]
+    branches: [ "main", "jake-dev", "eklipsed" ]
   pull_request:
-    branches: [ "main", "jake-dev" ]
+    branches: [ "main", "jake-dev", "eklipsed" ]
 
 jobs:
   build:
@@ -14,4 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: make
-      run: make
+      run: |
+        git submodule update --remote
+        make
