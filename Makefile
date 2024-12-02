@@ -4,7 +4,7 @@ CFLAGS	:=$(CFLAGS) -Ideps/cglm/include
 
 ifeq ($(call FINDGOAL,rel),rel)
 	BINDIR	:=bin/rel
-	CFLAGS	+=$(CFLAGS) -O2 -NDEBUG
+	CFLAGS	+=$(CFLAGS) -O2 -DNDEBUG
 else
 	BINDIR	:=bin/dbg
 	CFLAGS	+=$(CFLAGS) -O0 -g
@@ -84,7 +84,8 @@ $(2): $(1)
 	mkdir -p $$(dir $$@)
 	intermediate=$(patsubst %.metallib,%.ir,$(2));\
 	xcrun -sdk macosx metal -o $$$$intermediate -c $$^;\
-	xcrun -sdk macosx metallib -o $$@ $$$$intermediate
+	xcrun -sdk macosx metallib -o $$@ $$$$intermediate;\
+	rm $$$$intermediate
 endef
 
 ifeq ($(UNAME),Darwin)
