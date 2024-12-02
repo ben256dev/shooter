@@ -35,5 +35,6 @@ UI_VERTEX
 // vertex_attribs_t get_uivert_attribs(u32 bufslot, u32 initial_location)
 
 SDL_GPUBuffer* create_vertex_buffer(SDL_GPUDevice* dev, usize sz);
+SDL_GPUBuffer* create_index_buffer(SDL_GPUDevice* dev, usize sz);
 bool update_vertex_buffer_once(
     SDL_GPUDevice* dev, SDL_GPUBuffer* vbo, void* data, usize sz, usize offs);

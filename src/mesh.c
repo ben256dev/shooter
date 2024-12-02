@@ -13,6 +13,19 @@ SDL_GPUBuffer* create_vertex_buffer(SDL_GPUDevice* dev, usize sz)
     }
     return buffer;
 }
+SDL_GPUBuffer* create_index_buffer(SDL_GPUDevice* dev, usize sz)
+{
+    SDL_GPUBuffer* buffer = SDL_CreateGPUBuffer(dev,
+        &(SDL_GPUBufferCreateInfo) {
+            .usage = SDL_GPU_BUFFERUSAGE_INDEX,
+            .size = sz,
+            .props = 0,
+        });
+    if (!buffer) {
+        warn("create_index_buffer");
+    }
+    return buffer;
+}
 
 bool update_vertex_buffer_once(
     SDL_GPUDevice* dev, SDL_GPUBuffer* vbo, void* data, usize sz, usize offs)
