@@ -13,7 +13,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    
     - name: Install Deps
-      run: sudo apt update; sudo apt install shaderc
+      run: sudo apt install shaderc
+      
     - name: make
       run: make
