@@ -21,6 +21,7 @@ OBJS	:=$(call GETOBJS,$(SRCS))
 TARGET	:=shooter
 
 .DEFAULT_GOAL: dbg
+cicd: $(BINDIR)/$(TARGET)
 dbg: $(BINDIR)/$(TARGET) shaders
 rel: $(BINDIR)/$(TARGET) shaders
 
