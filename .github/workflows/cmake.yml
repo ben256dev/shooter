@@ -2,9 +2,9 @@ name: Shooter CI
 
 on:
   push:
-    branches: [ "main", "jake-dev" ]
+    branches: [ "main", "jake-dev", "ben-dev" ]
   pull_request:
-    branches: [ "main", "jake-dev" ]
+    branches: [ "main", "jake-dev", "ben-dev" ]
 
 jobs:
   build:
