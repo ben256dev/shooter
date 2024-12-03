@@ -613,17 +613,33 @@ u0 mat4_scale(mat4* p_result, vec3 scale)
 
 u0 mat4_rotation_from_vec3(mat4* p_result, vec3 rotation)
 {
-
     // Store the rotation matrix
-    *p_result = (mat4) { cosf(rotation.x) + powf(rotation.x, 2) * (1 - cosf(rotation.x)),
-        rotation.x * rotation.y * (1 - cosf(rotation.y)) - rotation.z * sinf(rotation.y),
-        rotation.x * rotation.z * (1 - cosf(rotation.z)) + rotation.y * sinf(rotation.z), 0,
-        rotation.y * rotation.x * (1 - cosf(rotation.x)) + rotation.z * sinf(rotation.x),
-        cosf(rotation.y) + powf(rotation.y, 2) * (1 - cosf(rotation.y)),
-        rotation.y * rotation.z * (1 - cosf(rotation.z)) - rotation.x * sinf(rotation.z), 0,
-        rotation.y * rotation.x * (1 - cosf(rotation.x)) + rotation.z * sinf(rotation.x),
-        rotation.y * rotation.x * (1 - cosf(rotation.x)) + rotation.z * sinf(rotation.x),
-        cosf(rotation.x) + powf(rotation.x, 2) * (1 - cosf(rotation.x)), 0, 0, 0, 0, 1 };
+    float cx = cosf(rotation.x);
+    float sx = sinf(rotation.x);
+    float cy = cosf(rotation.y);
+    float sy = sinf(rotation.y);
+    float cz = cosf(rotation.z);
+    float sz = sinf(rotation.z);
+
+    ((float*)p_result)[0 * 4 + 0] = cy * cz;
+    ((float*)p_result)[0 * 4 + 1] = -cy * sz;
+    ((float*)p_result)[0 * 4 + 2] = sy;
+    ((float*)p_result)[0 * 4 + 3] = 0.0f;
+
+    ((float*)p_result)[1 * 4 + 0] = sx * sy * cz + cx * sz;
+    ((float*)p_result)[1 * 4 + 1] = -sx * sy * sz + cx * cz;
+    ((float*)p_result)[1 * 4 + 2] = -sx * cy;
+    ((float*)p_result)[1 * 4 + 3] = 0.0f;
+
+    ((float*)p_result)[2 * 4 + 0] = -cx * sy * cz + sx * sz;
+    ((float*)p_result)[2 * 4 + 1] = cx * sy * sz + sx * cz;
+    ((float*)p_result)[2 * 4 + 2] = cx * cy;
+    ((float*)p_result)[2 * 4 + 3] = 0.0f;
+
+    ((float*)p_result)[3 * 4 + 0] = 0.0f;
+    ((float*)p_result)[3 * 4 + 1] = 0.0f;
+    ((float*)p_result)[3 * 4 + 2] = 0.0f;
+    ((float*)p_result)[3 * 4 + 3] = 1.0f;
 
     // Done
     return;
